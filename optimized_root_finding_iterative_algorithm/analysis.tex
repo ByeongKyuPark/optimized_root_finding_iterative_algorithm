@@ -1,0 +1,99 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath,euscript}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{amsfonts}
+\usepackage{amscd}
+
+\usepackage{courier}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+
+\begin{document}
+	
+\title{Project 1}
+\date{}
+\author{ByeongKyu Park}
+
+\maketitle
+
+\section*{The Algorithm}
+
+Implemented in Python, this method combines the secant and tangent approaches for finding square roots.
+
+
+\begin{Verbatim}
+# Python code for the combined root-finding method
+def combined_root_finding(N, intervals):
+    # Definitions of f(x) and df(x) omitted for brevity
+    x0, x1 = initial_x0, initial_x1
+    for i in range(num_iter):
+        # Calculation of x_secant and x_tangent
+        x_new = (x_secant + x_tangent) / 2
+        if i in intervals:
+            approximations[i] = x_new
+        x0, x1 = sorted([x_new, x0, x1], key=lambda x: abs(x - x_new))[:2]
+    return approximations
+\end{Verbatim}
+
+\section*{Explanation}
+
+This method modifies the traditional secant method by incorporating the tangent's x-intercept at the midpoint between two approximations. It aims to leverage both the global approximation provided by the secant line and the local correction offered by the tangent line, using their average as the next approximation. This hybrid approach is designed to converge more quickly to the root in the initial iterations compared to the original secant method.
+
+\section*{Analysis}
+
+After conducting a Monte Carlo simulation with \(n = 10\,000\), I observed that the modified method tends to yield a lower average error in the first few iterations compared to the traditional secant method. This suggests that the combined use of secant and tangent lines effectively accelerates the convergence process in the early stages.
+
+
+\vspace{5mm}
+
+\begin{tabular}{lll}
+Interval & Modified Secant's Average Error & Secant Method's Average Error \\
+2 & 0.5084796670581864 & 0.7335521818290671 \\
+3 & 0.3106022555102186 & 1.6469349397165645 \\
+4 & 0.1196650704267478 & 0.2783513649879494 \\
+5 & 0.0 & 0.0 \\
+\end{tabular}
+\vspace{5mm}
+
+\section*{Order of Convergence for Combined Root Finding Method}
+
+Considering the function $f(x) = x^2 - N$ with $N > 0$, we define the iterative process where $x_2$ is computed as the midpoint of $x_0$ and $x_1$. Let $k = x_1 - x_0$, and denote the x-intercepts of the secant line connecting $x_0$ and $x_1$, and the tangent at the midpoint, as $p$ and $q$ respectively. The expressions for $p$ and $q$ are given as:
+
+\begin{align*}
+p &= \frac{N - x_1^2}{x_0 + x_1} + x_1, \\
+q &= \frac{N - \left(\frac{x_0 + x_1}{2}\right)^2}{x_0 + x_1} + \frac{x_0 + x_1}{2}.
+\end{align*}
+
+The new approximation $x_2$ can then be expressed as:
+
+\begin{equation*}
+x_2 = \frac{p+q}{2} =
+ \frac{2N + \frac{1}{4}x_1^2 + \frac{1}{4}x_0^2 + \frac{3}{2}x_0x_1}{2(x_0 + x_1)}.
+\end{equation*}
+
+Introducing $\hat{x} = |x - p|$,
+\begin{equation*}
+\hat{x}_2 = \frac{2N + \frac{1}{4}(\hat{x}_1 + p)^2 + \frac{1}{4}(\hat{x}_0 + p)^2 + \frac{3}{2}(\hat{x_0} + p)(\hat{x_1} + p)}{2(\hat{x}_0 + \hat{x}_1 + 2p)} - p
+\end{equation*}
+
+the error term for the new approximation simplifies to $\hat{x}_2 = \frac{1}{2}(\hat{x}_0 + \hat{x}_1)$. Defining $h_1 = \hat{x}_2 - \hat{x}_1$, we find $h_1 = -\frac{1}{2}h_0$. As $n \rightarrow \infty$, both $\hat{x}_n$ and $\hat{x}_{n-1}$ approximate $k / (1 - (-\frac{1}{2})) = \frac{2}{3}k$. Consequently, the order of convergence $\alpha$ is computed as:
+
+\begin{equation*}
+\lim_{n \to \infty} \frac{\ln(\hat{x}_n)}{\ln(\hat{x}_{n-1})} = 1,
+\end{equation*}
+
+and the factor $\lambda$ becomes:
+
+\begin{equation*}
+\lim_{n \to \infty} \frac{\hat{x}_n}{\hat{x}_{n-1}} = 1.
+\end{equation*}
+
+This indicates that the convergence is linear, with an order of convergence of $1$.
+This is a slower convergence that the standard secant method, which has \(\alpha \approx 1.618\).
+
+\section*{Future Improvement}
+To improve reliability, we could add a method like bisection. This will keep our guesses close to the real root, making sure they don't stray too far.
+
+\end{document}

@@ -1,9 +1,12 @@
+#MAT357 - Project I
+#byeonggyu.park
+
 import math
 import random
 
 num_iter = 5  # Number of iterations
 initial_x0 = 4
-initial_x1 = 32
+initial_x1 = 64
 
 def combined_root_finding(N, intervals):
     def f(x): return x**2 - N
@@ -43,7 +46,6 @@ def original_secant_sqrt(N, intervals):
     for i in range(num_iter):
         y0, y1 = f(x0), f(x1)
         x = (y1 * x0 - y0 * x1) / (y1 - y0)
-
         if i in intervals:
             approximations[i] = x
 
@@ -53,7 +55,7 @@ def original_secant_sqrt(N, intervals):
 # Monte Carlo test to compare methods
 def monte_carlo_test(test_cases=100000, specific_iters=[2, 3, 4, 5,10]):
     all_intervals = specific_iters
-    random_ns = [2**(random.uniform(-2, 30)) for _ in range(test_cases)]
+    random_ns = [2**(random.uniform(-4, 25)) for _ in range(test_cases)]
     errors_at_intervals = {interval: {'modified_secant': [], 'secant': []} for interval in all_intervals}
 
     for N in random_ns:
