@@ -1,75 +1,76 @@
 import math
 import random
 
-num_iter=100
+num_iter = 5  # Number of iterations
+initial_x0 = 4
+initial_x1 = 32
 
+def modified_secant_sqrt(N, intervals):
+    def f(x): return x**2 - N  # The function y = x^2 - N
+    def df(x): return 2*x
 
-def weighted_newton_sqrt_with_intervals(N, intervals):
-    def f(x): return x**2 - N
-    def Df(x): return 2 * x
-    x = N / 2  # Improved starting point based on the magnitude of N
+    x0, x1 = initial_x0, initial_x1
     approximations = {}
-    
+
     for i in range(num_iter):
-        y = f(x)
-        Dy = Df(x)
-        # Dynamic adjustment based on the magnitude of y relative to N
-        x_next = x - y / Dy
-        magnitude_adjustment =(x_next-x)/(2*x)
-        adjusted_Dy = Dy * (1 + magnitude_adjustment)
-        
-        x_next = x - y / adjusted_Dy
-        
+        y0, y1 = f(x0), f(x1)
+        slope_secant = (y1 - y0) / (x1 - x0)  # Slope of the secant line
+        midpoint = (x0 + x1) / 2
+        slope_derivative = df(midpoint)  # Slope at the midpoint using derivative
+        adjustment_factor = 1.0
+
+        # Adjusting the x-intercept calculation
+        delta = adjustment_factor * (x1 - x0) if slope_derivative < slope_secant else -adjustment_factor*(x1-x0)
+        x = x1 - (y1 + delta) / slope_secant
+
         if i in intervals:
-            approximations[i] = x_next  # Store approximation at this interval
-        
-        x = x_next
-    
+            approximations[i] = x
+
+        x0, x1 = x1, x  # Update for the next iteration
+
     return approximations
 
-def newton_sqrt_with_intervals(N, intervals):
+def original_secant_sqrt(N, intervals):
     def f(x): return x**2 - N
-    def Df(x): return 2 * x
-    x = N/2  # Non-adaptive starting point
+    x0, x1 = initial_x0, initial_x1
     approximations = {}
+
     for i in range(num_iter):
-        y, Dy = f(x), Df(x)
-        x_next = x - y / Dy
+        y0, y1 = f(x0), f(x1)
+        x = (y1 * x0 - y0 * x1) / (y1 - y0)
+
         if i in intervals:
-            approximations[i] = x_next  # Store approximation at this interval
-        x = x_next
+            approximations[i] = x
+
+        x0, x1 = x1, x
     return approximations
 
-def monte_carlo_test(test_cases=1000, specific_iters=[2, 3, 4, 5, 6, 7, 8, 9, 10, 50, 100]):
+# Monte Carlo test to compare methods
+def monte_carlo_test(test_cases=100000, specific_iters=[2, 3, 4, 5,10]):
     all_intervals = specific_iters
-    
-    # Adjust the range for N values to be more manageable
-    random_ns = [2**(random.uniform(0, 100)) for _ in range(test_cases)]
-    errors_at_intervals = {interval: {'weighted_newton': [], 'newton': []} for interval in all_intervals}
-    
+    random_ns = [2**(random.uniform(-5, 30)) for _ in range(test_cases)]
+    errors_at_intervals = {interval: {'modified_secant': [], 'secant': []} for interval in all_intervals}
+
     for N in random_ns:
         true_sqrt = math.sqrt(N)
 
-        # Testing Weighted Newton's method
-        sqrt_approximations_weighted_newton = weighted_newton_sqrt_with_intervals(N, all_intervals)
+        sqrt_approximations_modified_secant = modified_secant_sqrt(N, all_intervals)
         for interval in all_intervals:
-            approx_sqrt = sqrt_approximations_weighted_newton.get(interval, true_sqrt)
-            error = abs(1 - approx_sqrt * (approx_sqrt / N))  # Adjusted error calculation
-            errors_at_intervals[interval]['weighted_newton'].append(error)
+            approx_sqrt = sqrt_approximations_modified_secant.get(interval, true_sqrt)
+            error = abs(1 - approx_sqrt / true_sqrt)
+            errors_at_intervals[interval]['modified_secant'].append(error)
 
-        # Testing Newton's method
-        sqrt_approximations_newton = newton_sqrt_with_intervals(N, all_intervals)
+        sqrt_approximations_secant = original_secant_sqrt(N, all_intervals)
         for interval in all_intervals:
-            approx_sqrt = sqrt_approximations_newton.get(interval, true_sqrt)
-            error = abs(1 - approx_sqrt * (approx_sqrt / N))  # Adjusted error calculation
-            errors_at_intervals[interval]['newton'].append(error)
+            approx_sqrt = sqrt_approximations_secant.get(interval, true_sqrt)
+            error = abs(1 - approx_sqrt / true_sqrt)
+            errors_at_intervals[interval]['secant'].append(error)
 
-    # Analysis: Calculate average errors at each interval
     for interval in all_intervals:
-        avg_error_weighted_newton = sum(errors_at_intervals[interval]['weighted_newton']) / test_cases
-        avg_error_newton = sum(errors_at_intervals[interval]['newton']) / test_cases
+        avg_error_modified_secant = sum(errors_at_intervals[interval]['modified_secant']) / test_cases
+        avg_error_secant = sum(errors_at_intervals[interval]['secant']) / test_cases
         print(f"Interval {interval}:")
-        print(f"  Weighted Newton's Average Error: {avg_error_weighted_newton}")
-        print(f"  Newton's Average Error: {avg_error_newton}")
+        print(f"  Modified Secant's Average Error: {avg_error_modified_secant}")
+        print(f"  Secant's Average Error: {avg_error_secant}")
 
 monte_carlo_test()

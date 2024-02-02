@@ -1,0 +1,15 @@
+Interval 2:
+  Modified Secant's Average Error: 0.7386422996661972
+  Secant's Average Error: 0.7386555592898747
+Interval 3:
+  Modified Secant's Average Error: 1.9936344011471407
+  Secant's Average Error: 1.9971845896435168
+Interval 4:
+  Modified Secant's Average Error: 0.24037801485809085
+  Secant's Average Error: 0.24847328218692155
+Interval 5:
+  Modified Secant's Average Error: 0.0
+  Secant's Average Error: 0.0
+Interval 10:
+  Modified Secant's Average Error: 0.0
+  Secant's Average Error: 0.0
